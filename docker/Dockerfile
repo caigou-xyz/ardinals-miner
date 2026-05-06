@@ -8,7 +8,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     TZ=UTC \
-    AITONGDAO_URL=https://aitongdao.com
+    AITONGDAO_URL=https://aitongdao.com \
+    SOLVER_WEB_SEARCH=1 \
+    REASONING_EFFORT=low
 
 # 系统依赖 (含 python3 给 awp-skill 用, stdlib only)
 RUN apt-get update && apt-get install -y --no-install-recommends \

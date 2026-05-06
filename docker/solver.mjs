@@ -14,7 +14,8 @@ import { stdin as input } from 'node:process';
 const MODEL = process.env.OPENAI_MODEL || 'gpt-5.5';
 const BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
 const API_KEY = process.env.OPENAI_API_KEY;
-const ENABLE_WEB_SEARCH = process.env.SOLVER_WEB_SEARCH === '1';
+const ENABLE_WEB_SEARCH = (process.env.SOLVER_WEB_SEARCH ?? '1') !== '0';
+const REASONING_EFFORT = process.env.REASONING_EFFORT || 'low';
 const HARD_TIMEOUT_MS = parseInt(process.env.SOLVER_TIMEOUT_MS || '60000', 10);
 
 if (!API_KEY) {
@@ -129,9 +130,10 @@ async function callResponsesAPI(prompt) {
   const body = {
     model: MODEL,
     input: prompt,
-    // 默认 low 给 web_search 留思考空间; 单独不用 web_search 时可降为 minimal
-    reasoning: { effort: process.env.REASONING_EFFORT || (ENABLE_WEB_SEARCH ? 'low' : 'minimal') },
   };
+  if (!['0', 'off', 'none'].includes(REASONING_EFFORT.toLowerCase())) {
+    body.reasoning = { effort: REASONING_EFFORT };
+  }
   if (ENABLE_WEB_SEARCH) {
     body.tools = [{ type: 'web_search' }];
   }
