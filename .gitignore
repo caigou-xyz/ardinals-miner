@@ -1,0 +1,24 @@
+.DS_Store
+
+# Local secrets and user-provided runtime config
+.env
+*.env
+config/docker.env
+
+# Runtime wallet/state/logs
+data/
+*.log
+cycle-logs/
+data-backup-*.tgz
+
+# Exported keys and local credentials
+*.gpg
+*.key
+*.pem
+wallets.json
+**/wallets.json
+**/wallets/
+
+# Dependency/cache output
+node_modules/
+npm-debug.log*

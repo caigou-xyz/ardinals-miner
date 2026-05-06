@@ -1,0 +1,16 @@
+.git
+.env
+*.env
+config/
+data/
+*.log
+cycle-logs/
+data-backup-*.tgz
+*.gpg
+*.key
+*.pem
+wallets.json
+**/wallets.json
+**/wallets/
+node_modules/
+npm-debug.log*
