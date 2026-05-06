@@ -74,7 +74,9 @@ docker run --rm -it \
   ghcr.io/caigou-xyz/ardinals-miner:latest ardi-agent buy-and-stake
 ```
 
-生成 KYA 验证链接：
+KYA 验证是可选项，不是挖矿答题的必需条件。已经完成 AWPRegistry 注册，并且有可用的 AWP stake/allocate 后，就可以启动挖矿。
+
+如果你想补充 KYA，可以生成验证链接：
 
 ```bash
 docker run --rm -it \
@@ -84,7 +86,7 @@ docker run --rm -it \
   ghcr.io/caigou-xyz/ardinals-miner:latest kya-agent claim-twitter
 ```
 
-`preflight` 通过后，一键启动挖矿：
+账号准备好后，一键启动挖矿：
 
 ```bash
 docker run -d --name ardinals-miner \

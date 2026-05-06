@@ -49,8 +49,8 @@ cmd_setup() {
 
 Next steps before mining can succeed:
 1. Fund this address with Base mainnet ETH for gas.
-2. Complete the project's KYA flow for your own account.
-3. Start the miner with the same wallet volume.
+2. Register the agent in AWPRegistry and complete AWP stake allocation.
+3. Start the miner with the same wallet volume. KYA is optional.
 EOF
 }
 
