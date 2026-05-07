@@ -59,9 +59,10 @@ if [ $SOLVER_RC -ne 0 ] || [ ! -s /tmp/top5.json ]; then
 fi
 log "solver: $(jq -c '{total_solved, total_riddles, top5_count: (.top5|length), total_s}' /tmp/top5.json)"
 
-# Step 3: ⚡ 并发 commit (awp-wallet send-tx.lock 内部 serialize nonce)
-log "committing top-$DRY_COMMITS in parallel..."
-COMMIT_PIDS=()
+# Step 3: serial commit — each tx waits for the previous to land so
+# the next one can read the incremented nonce. Cross-process awp-wallet
+# locks don't exist, so parallel collides on nonce (~20% loss observed).
+log "committing top-$DRY_COMMITS sequentially..."
 declare -a COMMIT_WIDS
 mkdir -p /tmp/commits
 rm -f /tmp/commits/*.json /tmp/commits/*.rc
@@ -72,22 +73,15 @@ while IFS= read -r entry; do
   WORD_ID=$(echo "$entry" | jq -r '.word_id')
   ANSWER=$(echo "$entry" | jq -r '.answer')
   CONF=$(echo "$entry" | jq -r '.confidence')
-  log "  spawn commit word_id=$WORD_ID answer='$ANSWER' conf=$CONF"
+  log "  commit word_id=$WORD_ID answer='$ANSWER' conf=$CONF"
   COMMIT_WIDS[$i]="$WORD_ID"
-  (
-    # 显式 --staker 防 AWP RPC 抖动; 先保存完整输出再提取 JSON 块
-    ardi-agent commit --word-id "$WORD_ID" --answer "$ANSWER" --staker "$AGENT_ADDR" \
-      > /tmp/commits/$WORD_ID.raw 2>&1
-    RC=$?
-    echo $RC > /tmp/commits/$WORD_ID.rc
-    sed -n '/^{/,$p' /tmp/commits/$WORD_ID.raw > /tmp/commits/$WORD_ID.json
-  ) &
-  COMMIT_PIDS+=($!)
+  ardi-agent commit --word-id "$WORD_ID" --answer "$ANSWER" --staker "$AGENT_ADDR" \
+    > /tmp/commits/$WORD_ID.raw 2>&1
+  RC=$?
+  echo $RC > /tmp/commits/$WORD_ID.rc
+  sed -n '/^{/,$p' /tmp/commits/$WORD_ID.raw > /tmp/commits/$WORD_ID.json
   i=$((i+1))
 done <<< "$COMMIT_ENTRIES"
-
-# 等所有 commit
-wait "${COMMIT_PIDS[@]}" 2>/dev/null
 
 COMMIT_COUNT=0
 ALREADY_COUNT=0
